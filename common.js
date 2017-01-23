@@ -134,12 +134,5 @@
 		}
 	}
 
-	const loadSummaryGuard = () => (new SummaryGuard());
-
-	/* do not attach load event handler after page is loaded */
-	if (document.readyState === 'complete') {
-		loadSummaryGuard();
-	} else {
-		window.addEventListener('load', loadSummaryGuard);
-	}
+	new SummaryGuard();
 };
