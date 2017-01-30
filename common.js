@@ -16,7 +16,6 @@
 				summary: document.getElementsByName('wpSummary')[0],
 				summaryHeader,
 				summaryHeaderLabel: summaryHeader.getElementsByTagName('label')[0],
-				submitButton: document.getElementsByName('wpSave')[0],
 				checkbox: null,
 				warning: null
 			};
@@ -37,10 +36,6 @@
 
 		_setupEvents() {
 			this._elements.editform.addEventListener('submit', evt => {
-				if (evt.target !== this._elements.submitButton) {
-					return;
-				}
-
 				if (!this._verifySubmit()) {
 					evt.preventDefault();
 				}
