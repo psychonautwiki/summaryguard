@@ -7,9 +7,15 @@
 				return;
 			}
 
+			this._initialSectionSummary = /\/\* (.*?) \*\//;
+
+			const summaryHeader = document.getElementById('wpSummaryLabel');
+
 			this._elements = {
 				editform: document.getElementsByName('editform')[0],
 				summary: document.getElementsByName('wpSummary')[0],
+				summaryHeader,
+				summaryHeaderLabel: summaryHeader.getElementsByTagName('label')[0],
 				checkbox: null,
 				warning: null
 			};
@@ -24,6 +30,8 @@
 		_setup() {
 			this._renderUI();
 			this._setupEvents();
+
+			this._patchUI();
 		}
 
 		_setupEvents() {
@@ -41,6 +49,25 @@
 			});
 		}
 
+		_patchUI() {
+			const sectionName = this._getSectionName();
+
+			if (sectionName) {
+				const sectionNote = this._buildSectionNote(`[Section: ${sectionName[1]}]`);
+
+				this._elements.summaryHeader.insertBefore(sectionNote, this._elements.summaryHeader.firstChild);
+
+				// clear summary
+				this._elements.summary.value = '';
+			}
+
+			this._elements.summaryHeaderLabel.innerHTML = 'Explanation of this change:';
+		}
+
+		_getSectionName() {
+			return (this._elements.summary.value || '').match(this._initialSectionSummary);
+		}
+
 		_setAutoSummary() {
 			if (!this._isSummaryEmpty()) {
 				return;
@@ -49,14 +76,25 @@
 			this._elements.summary.value = 'Grammatics';
 		}
 
-		_isSummaryEmpty() {
-			const summary = this._elements.summary.value;
+		_getSummary() {
+			return this._elements.summary.value;
+		}
 
-			// factually empty
-			return summary === '' || /\/\* (.*?) \*\//.test(summary);
+		_hasInitialSummary(summary) {
+			return this._initialSectionSummary.test(summary);
+		}
+
+		_isSummaryEmpty() {
+			return this._getSummary() === '';
 		}
 
 		_verifySubmit() {
+			if (this._hasInitialSummary(this._getSummary())) {
+				this._showWarning('Your summary must not include text of the format "/* anything */".');
+
+				return false;
+			}
+
 			if (this._isSummaryEmpty()) {
 				this._showWarning('You cannot save this article without a summary. Please consult our <a href="/wiki/Guidelines">guidelines</a> (general article guide).');
 
@@ -131,6 +169,17 @@
 			notice.style.color = 'red';
 
 			return notice;
+		}
+
+		_buildSectionNote(sectionName) {
+			const note = document.createElement('span');
+
+			note.style.color = 'red';
+			note.style.marginRight = '5px';
+
+			note.appendChild(document.createTextNode(sectionName));
+
+			return note;
 		}
 	}
 
